@@ -18,3 +18,4 @@ class User(BaseModel):
     active: bool = False
     created_at: datetime = datetime.utcnow()
     points: int = 0
+    fcmToken: Optional[str]

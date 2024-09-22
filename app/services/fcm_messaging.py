@@ -1,17 +1,14 @@
 import firebase_admin
 from firebase_admin import credentials, firestore, messaging
 
-# Path to your service account key JSON file (downloaded from Firebase Console)
 SERVICE_ACCOUNT_PATH = "f9c8ad7b0a81cb6acbf415830d536defcc650c33.json"
 
-# Initialize Firebase Admin SDK
 cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
 firebase_admin.initialize_app(cred)
 
 # Initialize Firestore
 db = firestore.client()
 
-# Function to store the user's FCM token in Firestore
 def store_fcm_token(user_id, fcm_token):
     """Stores the FCM token for a user."""
     try:
@@ -22,7 +19,6 @@ def store_fcm_token(user_id, fcm_token):
     except Exception as e:
         print(f"Error storing FCM token: {e}")
 
-# Function to retrieve the FCM token from Firestore for a specific user
 def get_fcm_token(user_id):
     """Retrieves the FCM token for a user."""
     try:
@@ -37,7 +33,6 @@ def get_fcm_token(user_id):
         print(f"Error retrieving FCM token: {e}")
         return None
 
-# Function to send a notification to a user by their FCM token
 def send_message_to_user(fcm_token, message_body):
     """Sends a notification to a user using their FCM token."""
     if not fcm_token:
@@ -58,7 +53,6 @@ def send_message_to_user(fcm_token, message_body):
     except Exception as e:
         print(f"Error sending message: {e}")
 
-# Function to send batch messages to multiple users
 def send_batch_message(fcm_tokens, message_body):
     """Sends a batch of messages to multiple users."""
     if not fcm_tokens:
@@ -81,24 +75,3 @@ def send_batch_message(fcm_tokens, message_body):
         print(f"Successfully sent batch message: {response}")
     except Exception as e:
         print(f"Error sending batch message: {e}")
-
-# Example Usage
-if __name__ == "__main__":
-    # Example user ID and token for storing/retrieving token
-    user_id = "example_user_id"
-    user_fcm_token = "example_fcm_token"
-
-    # Store user's FCM token
-    store_fcm_token(user_id, user_fcm_token)
-
-    # Retrieve the FCM token for a user
-    fcm_token = get_fcm_token(user_id)
-
-    # Send a message to the user
-    if fcm_token:
-        send_message_to_user(fcm_token, "Hello! You have a new message.")
-
-    # Example for sending a batch message to multiple users
-    fcm_tokens = [fcm_token]  # Add multiple tokens to this list
-    if fcm_tokens:
-        send_batch_message(fcm_tokens, "This is a batch message for multiple users.")
