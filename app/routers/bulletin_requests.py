@@ -60,16 +60,16 @@ async def get_comments(post_uid: int):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @router.get("/bulletin", response_model=Request)
-async def get_relavent_request_list(page: int = 1, limit: int = 30):
+async def get_relevant_request_list(page: int = 1, limit: int = 30):
     try:
         logging.info("Fetching bulletin board")
-        request_data = bulletin_service.get_relavent_request_list(page, limit)
+        request_data = bulletin_service.get_relevant_request_list(page, limit)
         if request_data:
             return [Request(**data) for data in request_data]
         else:
             raise HTTPException(status_code=404, detail="Request posts not found.")
     except Exception as e:
-        logging.error(f"Error in get_relavent_request_list: {e}")
+        logging.error(f"Error in get_relevant_request_list: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 @router.put("/bulletin/{post_uid}", response_model=schemas.Request)

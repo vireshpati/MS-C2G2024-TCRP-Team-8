@@ -50,7 +50,7 @@ class BulletinService:
         except Exception as e:
             logging.error(f"Error retrieving all comments: {e}")
 
-    def get_relavent_requests(self, page, limit):
+    def get_relevant_requests(self, page, limit):
         try:
             docs_ref = self.db.collection('requests')
             now = datetime.datetime.utcnow()
@@ -62,7 +62,7 @@ class BulletinService:
                 all_requests.append(request_data)
             return all_requests
         except Exception as e:
-            logging.error(f"Error retrieving relavent requests: {e}")
+            logging.error(f"Error retrieving relevant requests: {e}")
 
     def update_request_post(self, request_data):
         try:

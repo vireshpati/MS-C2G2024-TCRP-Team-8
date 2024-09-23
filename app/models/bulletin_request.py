@@ -11,12 +11,12 @@ class Comment(BaseModel):
     created: datetime    
 
 class Request(BaseModel):
-    post_uid: int    
+    post_uid: str    
     author_uid: str
     created: datetime 
     title: str
     content: str
-    tag: Optional[str] = 'others'
+    tag: Optional[str] = 'others'       # intended to be 'babysitting', 'tutoring', 'pickupchild', 'mealshare', 'needride', 'others'...
     location_of_help: Optional[str] = None
     date_help_needed: str
     start_time: Optional[str] = None
