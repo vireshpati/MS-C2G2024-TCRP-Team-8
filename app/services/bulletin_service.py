@@ -87,7 +87,8 @@ class BulletinService:
         except Exception as e:
             logging.error(f"Error deleting request: {e}")
 
-    def get_relavent_request(self):
+    # done
+    def get_relavent_requests(self):
         try:
             docs_ref = self.db.collection('requests')
             now = datetime.datetime.utcnow()

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.dependencies import get_current_user
 from app.models.user import User
-from app.models.bulletin_request import Request, Comment, CommentCreate
+from app.models.bulletin_request import Request, Comment
 from app.services.bulletin_service import BulletinService
 from app.models.patch import ProfilePatch
 import logging
@@ -70,35 +70,9 @@ async def get_comments(post_uid: int):
         logging.error(f"Error in get_request: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@router.get("/bulletin/{post_uid}/com", response_model=Request)
-async def get_request_comments(post_uid: int):
-    try:
-        logging.info(f"Fetching request with post_uid: {post_uid}")
-        request_data = 
-
-        doc_ref = db.collection('requests').document(post_uid)
-        doc = doc_ref.get()
-        if doc.exists:
-            replies_ref = doc_ref.collection('replies')
-            replies = replies_ref.stream() 
-            replies_list = [reply.to_dict() for reply in replies]
-
-            request_data = doc.to_dict()
-            request_data['replies'] = replies_list
-
-            logging.info(f"Request data retrieved: {request_data}")
-            return Request(**request_data)
-        else:
-            logging.warning(f"Request post not found for post_uid: {post_uid}")
-            raise HTTPException(status_code=404, detail="Request post not found.")
-    except Exception as e:
-        logging.error(f"Error in get_request_comments: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
-VALID_TAGS = ['babysitting', 'tutoring', 'pickupchild', 'mealshare', 'needride', 'others']
 
 @router.get("/bulletin", response_model=Request)
-async def get_request_list(
+async def get_relavent_request_list(
     sort_field: str = Query(None, description="Sort by 'post_creation_date' or 'confirm_by'"),
     asc: bool = Query(False, description="True for ascending order, False (default) for descending order"),
     filter_tag: str = Query(None, description="one of 'babysitting', 'tutoring', 'pickupchild', 'mealshare', 'needride', 'others'"),
@@ -107,40 +81,14 @@ async def get_request_list(
     resolved_requests: bool = Query(False, description="True shows resolved requests, False (default) shows unresolved requestsr")
 ):
     try:
-        logging.info(f"Fetching bulletin board.")
-        doc_ref = db.collection('requests')
-        if tag and tag not in VALID_TAGS:
-            raise HTTPException(status_code=400, detail=f"Invalid tag: {tag}. Must be one of {VALID_TAGS}.")
-        now = datetime.datetime.utcnow()
-        offset = (page - 1) * limit
-
-        query = doc_ref.where('deleted', '==', False) \
-                        .where('resolved', '==', resolved_requests) \
-                        .where('date_help_needed', '>=', now)
-        if tag:
-            query = query.where('tag', '==', tag)
-        if sort_by == 'post_creation_date':
-            query = query.order_by('post_creation_date', direction=firestore.Query.ASCENDING if asc else firestore.Query.DESCENDING)
-        elif sort_by == 'confirm_by':
-            query = query.order_by('confirm_by', direction=firestore.Query.ASCENDING if asc else firestore.Query.DESCENDING)
-        elif sort_by == 'date_help_needed':
-            query = query.order_by('date_help_needed', direction=firestore.Query.ASCENDING if asc else firestore.Query.DESCENDING)
+        logging.info(f"Fetching bulletin board")
+        request_data = bulletin_service.get_relavent_request_list()
+        if request_data:
+            return Request(**request_data)
         else:
-            query = query.order_by('post_creation_date', direction=firestore.Query.DESCENDING)
-        relavent_requests = query.limit(limit).offset(offset).stream()
-
-        # Convert to a list of dictionaries
-        relavent_requests_list = [req.to_dict() for req in relavent_requests]
-        if not relavent_requests_list:
-            logging.warning(f"No relavent posts found")
-            raise HTTPException(status_code=404, detail="No relavent posts found on bulletin board")
-
-        # Convert dictionaries to Request instances
-        reqs = [Request(**req) for req in relavent_requests_list]
-        logging.info(f"Bulletin board retrieved")
-        return reqs          
+            raise HTTPException(status_code=404, detail="Request post not found.")
     except Exception as e:
-        logging.error(f"Error in get_request_list {e}")
+        logging.error(f"Error in get_request: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 @router.put("/bulletin/{post_uid}/edit", response_model=schemas.Request)
