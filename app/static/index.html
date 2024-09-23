@@ -208,6 +208,77 @@
             document.getElementById("userProfilePicture").src = profile.profile_picture || "default-profile.png";
             document.getElementById("dashboard").style.display = "block";
         }
+
+        const messaging = firebase.messaging();
+
+        // Request Notification Permission
+        document.getElementById('requestPermissionBtn').addEventListener('click', function() {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    console.log('Notification permission granted.');
+                    getFcmToken(); // Generate the FCM token
+                } else {
+                    console.error('Notification permission not granted.');
+                }
+            });
+        });
+
+        // Generate and retrieve the FCM token
+        function getFcmToken() {
+            messaging.getToken({ vapidKey: "YOUR_VAPID_KEY" })
+            .then(currentToken => {
+                if (currentToken) {
+                    console.log('FCM Token:', currentToken);
+                    sendTokenToServer(currentToken); // Send the token to your backend
+                } else {
+                    console.log('No registration token available.');
+                }
+            }).catch(error => {
+                console.error('Error retrieving FCM token:', error);
+            });
+        }
+
+        // Send FCM token to the backend
+        function sendTokenToServer(token) {
+            const userId = "user1"; // Replace with actual user ID
+            fetch('/fcm/store-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId, token }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerText = 'Token stored successfully!';
+                console.log('Token stored:', data);
+            })
+            .catch(error => {
+                console.error('Error storing token:', error);
+            });
+        }
+
+        // Send a test message to the user
+        document.getElementById('sendMessageBtn').addEventListener('click', function() {
+            const userId = "user1"; // Replace with actual user ID
+            const messageBody = "Hello from FastAPI!";
+            fetch('/fcm/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId, message: messageBody }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerText = 'Message sent successfully!';
+                console.log('Message sent:', data);
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
+        });
+
     </script>
 </body>
 </html>
