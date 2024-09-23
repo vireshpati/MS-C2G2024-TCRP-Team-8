@@ -28,6 +28,7 @@
     ]
   },
   "dependencies": {
+    "@botpress/chat": "0.4.0",
     "@fontsource/inter": "4.2.1",
     "@svgr/webpack": "5.5.0",
     "firebase": "10.13.2",
