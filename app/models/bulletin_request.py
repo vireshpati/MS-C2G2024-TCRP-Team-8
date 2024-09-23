@@ -25,3 +25,4 @@ class Request(BaseModel):
     resolved: bool = False
     number_of_comments: int = 0
     deleted: bool = False
+    contact_info: Optional[str] = 'dm'
